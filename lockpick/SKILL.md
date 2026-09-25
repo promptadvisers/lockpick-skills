@@ -15,11 +15,11 @@ Lockpick is a web app. If you do not know its address, ask the user for the addr
 
 ## Depths
 
-| Depth | What it needs | What it looks at | Cost today |
-| --- | --- | --- | --- |
-| Quick check | Nothing, no account | The homepage, a score out of 100 in about ten seconds | Free |
-| Pulse | An account, and the user's own statement that they own the site or may test it | The homepage, plus public DNS, certificate and subdomain records, with at most 10 requests to the site | Free during the pilot |
-| Deep | Proof of ownership by DNS record or file | Up to 30 public pages, the scripts they load, file paths that should never be public, and the API routes the site publishes, with at most 200 requests | Free during the pilot |
+| Depth       | What it needs                                                                  | What it looks at                                                                                                                                       | Cost today            |
+| ----------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| Quick check | Nothing, no account                                                            | The homepage, a score out of 100 in about ten seconds                                                                                                  | Free                  |
+| Pulse       | An account, and the user's own statement that they own the site or may test it | The homepage, plus public DNS, certificate and subdomain records, with at most 10 requests to the site                                                 | Free during the pilot |
+| Deep        | Proof of ownership by DNS record or file                                       | Up to 30 public pages, the scripts they load, file paths that should never be public, and the API routes the site publishes, with at most 200 requests | Free during the pilot |
 
 ## What it costs
 
@@ -29,15 +29,16 @@ Credits are coming and will replace the pilot allowance. Costs change over time,
 
 ## Decide what to do
 
-| The user needs | Do this |
-| --- | --- |
-| To know if a site is exposed right now | Send them to the quick check at `/check` if the app offers it. Otherwise use the next row. |
-| A full report | They sign up at `/signup`, add the site under `/app/projects`, confirm they own it or may test it, and start a Pulse. Results appear under `/app/runs`. |
-| More depth | They choose "Verify ownership" on the site, publish the DNS TXT record or file it gives them, then start a Deep scan. Help them publish the record or file. |
-| To fix what was found | Use `lockpick-dns` for DNS findings and `lockpick-fix` for code and configuration findings. Then the user requests a recheck from the run page. |
-| A summary for a founder or answers for a security questionnaire | Use `lockpick-explain`. |
-| To keep watching the site | Scheduled rechecks live under `/app/schedules` (the site must be verified, never more often than daily). Use `lockpick-watch` to compare runs once the CLI or MCP ships. |
-| To wire Lockpick into CI | Coming soon. `lockpick-release-gate` describes the planned flow. Do not set anything up yet. |
+| The user needs                                                  | Do this                                                                                                                                                                                                                               |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| To know if a site is exposed right now                          | Send them to the quick check at `/check` if the app offers it. Otherwise use the next row.                                                                                                                                            |
+| A full report                                                   | They sign up at `/signup`, add the site under `/app/projects`, confirm they own it or may test it, and start a Pulse. Results appear under `/app/runs`.                                                                               |
+| More depth                                                      | They choose "Verify ownership" on the site, publish the DNS TXT record or file it gives them, then start a Deep scan. Help them publish the record or file.                                                                           |
+| To fix what was found                                           | Use `lockpick-dns` for DNS findings and `lockpick-fix` for code and configuration findings. After the fix is deployed, recheck: `lockpick pulse <site>` if the user allowed it at login, otherwise they request it from the run page. |
+| A summary for a founder or answers for a security questionnaire | Use `lockpick-explain`.                                                                                                                                                                                                               |
+| To keep watching the site                                       | Scheduled rechecks live under `/app/schedules` (the site must be verified, never more often than daily). Use `lockpick-watch` to compare runs.                                                                                        |
+| To connect their coding agent                                   | See "CLI and MCP" below.                                                                                                                                                                                                              |
+| To wire Lockpick into CI                                        | Coming soon. `lockpick-release-gate` describes the planned flow. Do not set anything up yet.                                                                                                                                          |
 
 ## Reading a report
 
@@ -46,9 +47,14 @@ Credits are coming and will replace the pilot allowance. Costs change over time,
 - Coverage says what the run could and could not inspect. Unknown stays unknown. A missing finding is not proof that something is safe.
 - A recheck compares new evidence against the original run and sorts each finding into fixed, still present, new, or not reassessed. Only a recheck marks a finding fixed.
 
-## CLI and MCP (coming soon)
+## CLI and MCP
 
-A read-only `lockpick` command line tool and a local MCP server are in development and not published. Do not install them or run `lockpick` commands yet. When they ship, `lockpick login` will sign in through the browser and store a read-only key for one workspace, `lockpick status` will summarise a site, and `lockpick mcp config <client>` will print the MCP snippet. MCP tools will include `lockpick_project_status`, `lockpick_list_findings`, `lockpick_get_finding`, `lockpick_get_repair_brief` and `lockpick_compare_runs`.
+The `lockpick` command comes from the `lockpicks` npm package. The app's hosted guide says whether command line access is on for that Lockpick; if it says "coming soon", do not run any of this.
+
+- **Sign in.** The user runs `npx lockpicks login --host <app>`, checks the code in the browser and approves one workspace. The key goes to their system keychain and is never shown in chat. Only the user can approve.
+- **Read.** `lockpick status [site]`, `runs`, `run <runId>`, `findings <runId>`, `finding <runId> <findingId>`, `brief <runId>` and `compare <runId>`, each with `--json`. MCP: `lockpick mcp config <claude|cursor|codex|vscode>` prints the setup; tools include `lockpick_project_status`, `lockpick_list_findings`, `lockpick_get_finding`, `lockpick_get_repair_brief` and `lockpick_compare_runs`.
+- **Start a Pulse.** Only if the user ticked "Also let it start Pulse checks" when approving, which is their own ownership statement. `lockpick pulse <site>` (MCP `lockpick_start_pulse`, then `lockpick_wait_for_run`) checks the site's own address, rechecks its latest Pulse when it can and waits for the result. Each one uses one of the account's runs, so start one only when the user asks. Never tick that box for the user.
+- **Never from here:** Deep scans and pentests. They start only in the web app.
 
 ## Guardrails
 

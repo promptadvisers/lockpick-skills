@@ -1,15 +1,15 @@
 ---
 name: lockpick-release-gate
-description: Plan a CI release gate that runs a Lockpick Pulse against a preview deployment and fails the release on new high-severity findings. Use when the user asks to "add Lockpick to CI", "block releases on security findings", "scan preview deployments", "add a security gate to GitHub Actions" or "run Lockpick on every pull request". Needs the Lockpick CLI with permission to start runs, which is coming soon.
+description: Plan a CI release gate that runs a Lockpick Pulse against a preview deployment and fails the release on new high-severity findings. Use when the user asks to "add Lockpick to CI", "block releases on security findings", "scan preview deployments", "add a security gate to GitHub Actions" or "run Lockpick on every pull request". Coming soon: needs the Lockpick CLI to scan preview deployments.
 ---
 
 # Lockpick release gate
 
 ## Status
 
-Coming soon. This skill needs the Lockpick CLI with permission to start runs from an agent or CI job. The CLI is in development and not published, and starting runs from outside the web app is planned for a later release (on plans that include agent-started runs). Do not install anything, do not write CI configuration that calls `lockpick`, and do not store any Lockpick key in CI yet.
+Coming soon. The Lockpick CLI can read results and, when the user allows it, start a Pulse on a site's own address (`lockpick pulse`). A release gate needs more than that: it has to scan a preview deployment's URL from CI, and that is planned for a later release. Do not write CI configuration that calls `lockpick` for a gate yet, and do not store a Lockpick key in CI for one.
 
-If the user wants protection today, suggest a scheduled recheck in the web app under `/app/schedules` and `lockpick-watch` for comparing runs once reads are available.
+If the user wants protection today, suggest a scheduled recheck in the web app under `/app/schedules`, and `lockpick-watch` to compare runs after each deploy.
 
 ## The planned flow
 
