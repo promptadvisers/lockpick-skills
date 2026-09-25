@@ -9,7 +9,7 @@ Two jobs: turn a report into a short, honest summary a founder can act on, and d
 
 ## Get the report
 
-Today the user opens the run in the Lockpick web app and pastes the parts you need: the grade, the findings with their severity and repair guidance, "Checked and fine", and the coverage section. A shared result link works too. When the Lockpick CLI and MCP ship (coming soon), you will read the latest run and its findings directly. Until then, do not try to install or run them.
+With the Lockpick CLI or MCP connected (see the `lockpick` skill), read the latest run directly: `lockpick status <site>`, `lockpick run <runId>` and `lockpick findings <runId> --all` (MCP `lockpick_project_status`, `lockpick_get_run`, `lockpick_list_findings`). Otherwise the user opens the run in the Lockpick web app and pastes the parts you need: the grade, the findings with their severity and repair guidance, "Checked and fine", and the coverage section. A shared result link works too.
 
 Always note the run's date and depth (Quick check, Pulse or Deep). An answer is only as current as the run behind it.
 

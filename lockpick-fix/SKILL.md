@@ -1,23 +1,22 @@
 ---
 name: lockpick-fix
-description: Turn a Lockpick finding into a reviewed fix in the user's repository, then hand back for a recheck. Use when the user says "fix what Lockpick found", "apply the repair brief", "fix this finding", pastes a Lockpick repair brief or fix prompt, or asks to fix missing security headers, content security policy, cookie flags, exposed source maps or files, mixed content, CORS or leaked keys that Lockpick reported. Needs the Lockpick CLI or MCP (coming soon) to read findings directly; works today with a pasted repair brief.
+description: Turn a Lockpick finding into a reviewed fix in the user's repository, then hand back for a recheck. Use when the user says "fix what Lockpick found", "apply the repair brief", "fix this finding", pastes a Lockpick repair brief or fix prompt, or asks to fix missing security headers, content security policy, cookie flags, exposed source maps or files, mixed content, CORS or leaked keys that Lockpick reported. Reads findings through the Lockpick CLI or MCP, or from a pasted repair brief.
 ---
 
 # Fix a Lockpick finding
 
-## Status
+## Before you start
 
-This skill is built for the Lockpick CLI and MCP, which are coming soon and not published. Do not install them or run `lockpick` commands yet.
-
-Until they ship, it works with a repair brief the user pastes. On the run page they choose "Prepare a repair brief" or "Copy fix prompt" and paste the result to you. For DNS findings (SPF, DMARC, CAA, DNSSEC, dangling subdomains) use `lockpick-dns` instead.
+Read findings with the Lockpick CLI or MCP when the user has connected it (`npx lockpicks login`, see the `lockpick` skill). Otherwise ask for a brief: on the run page, "Copy prompt to fix all" at the top covers every finding that needs attention, and "Copy fix prompt" on a card covers one. They paste the result to you. The copy menu can tailor the prompt for your agent, or copy a one-line CLI command that opens you with the prompt already loaded. For DNS findings (SPF, DMARC, CAA, DNSSEC, dangling subdomains) use `lockpick-dns` instead.
 
 ## The flow
 
 ### 1. Read the finding
 
-- Today: from the pasted repair brief.
-- With the MCP (coming soon): `lockpick_get_repair_brief` for the run, and `lockpick_get_finding` for the evidence, the observed value and the expected value of each finding.
-- With the CLI (coming soon): `lockpick brief <runId>` and `lockpick finding <runId> <findingId>`.
+- With the MCP: `lockpick_get_repair_brief` for the run (no `findingId` gives the fix-all brief; pass `agent` to get your working instructions), and `lockpick_get_finding` for the evidence, the observed value and the expected value of each finding.
+- With the CLI: `lockpick brief <runId> --agent <you>` and `lockpick finding <runId> <findingId>`. `lockpick fix <runId> --agent <you>` saves the brief to `lockpick-fixes.md`; never commit that file.
+- A fix-all brief numbers the fixes. Work through them in that order, one commit per fix, report progress by number, and leave the "Steps only the owner can take" to the owner.
+- Otherwise: from the pasted repair brief.
 
 Note the severity, the affected URL or resource, what was observed, what was expected, and the repair guidance.
 
@@ -38,9 +37,11 @@ Show the diff, what it changes for visitors, how you tested it, how to roll it b
 
 ### 5. Recheck
 
-After the user deploys, they request a recheck from the run page. A recheck compares new evidence against the original run and marks each finding fixed, still present, new, or not reassessed. Copying a prompt or merging a change does not mark a finding fixed. Only a recheck does.
+A recheck compares new evidence against the original run and marks each finding fixed, still present, new, or not reassessed. Copying a prompt or merging a change does not mark a finding fixed. Only a recheck does, and it only means something once the change is deployed.
 
-With the MCP (coming soon), `lockpick_compare_runs` shows the result once the recheck finishes. Starting a recheck from an agent is planned for a later release. Until then the user starts it.
+- If the user allowed Pulse starts when they approved the CLI, and has deployed the fix, ask whether to recheck now. Then run `lockpick pulse <site>` (MCP `lockpick_start_pulse`, and `lockpick_wait_for_run` while it runs). It uses one of the account's runs. When it finishes, `lockpick compare <runId>` (MCP `lockpick_compare_runs`) shows what changed.
+- Otherwise the user requests the recheck from the run page, and you compare once it finishes.
+- A Deep finding needs a Deep recheck, which the user starts in the web app.
 
 ## Guardrails
 

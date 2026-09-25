@@ -1,19 +1,19 @@
 ---
 name: lockpick-watch
-description: Keep watch on a site with scheduled Lockpick runs, triage what changed between runs, and flag regressions. Use when the user asks "what changed since the last scan", "did my fix hold", "anything new on my site this week", "set up weekly Lockpick checks", "watch my site", "compare these two runs" or "did the last deploy break anything Lockpick checks". Needs the Lockpick CLI or MCP (coming soon) to read runs directly.
+description: Keep watch on a site with scheduled Lockpick runs, triage what changed between runs, and flag regressions. Use when the user asks "what changed since the last scan", "did my fix hold", "anything new on my site this week", "set up weekly Lockpick checks", "watch my site", "compare these two runs" or "did the last deploy break anything Lockpick checks". Reads runs through the Lockpick CLI or MCP.
 ---
 
 # Watch a site with Lockpick
 
-## Status
+## Before you start
 
-This skill needs the Lockpick CLI or MCP, which are coming soon and not published. Do not install them or run `lockpick` commands yet. Until they ship, the user can set up schedules in the web app and paste two runs' findings for you to compare by hand.
+This skill reads runs through the Lockpick CLI or MCP (`npx lockpicks login`, see the `lockpick` skill). Without them, the user can paste two runs' findings for you to compare by hand.
 
-## Set up a schedule (web app, available today)
+## Set up a schedule (web app)
 
 Scheduled rechecks live under `/app/schedules` in the Lockpick web app. The site has to be verified first, and a schedule never runs more often than daily. Each scheduled run counts like a manual one. During the free pilot that means one of the account's monthly runs, and once credits arrive it will use credits. Check the costs section of the hosted guide at `/agent-onboarding/SKILL.md` before suggesting a cadence. Weekly is a good default.
 
-## The flow (once the CLI or MCP ships)
+## The flow
 
 1. **Find the latest runs.** MCP `lockpick_list_runs` for the project, or CLI `lockpick runs --project <project>`. Pick the newest finished run and the one before it at the same depth. Runs at different depths cover different ground and should not be compared as if they were the same.
 2. **Compare.** MCP `lockpick_compare_runs`, or CLI `lockpick compare <runId>`. Each finding lands in one of four groups: fixed, still present, new, or not reassessed.
@@ -24,7 +24,8 @@ Scheduled rechecks live under `/app/schedules` in the Lockpick web app. The site
    - **Still present:** list with how long each has been open.
    - **Not reassessed:** say plainly that these were not checked this time. Unknown stays unknown.
 4. **Report back** in a short digest: one headline sentence, then the groups above, then one suggested next step.
-5. **While a run is in progress,** CLI `lockpick watch <runId>` will follow it until it finishes. Use it only when the user wants to wait.
+5. **While a run is in progress,** `lockpick watch <runId>` (MCP `lockpick_wait_for_run`) follows it until it finishes. Use it only when the user wants to wait.
+6. **To check right now,** and only if the user asks: `lockpick pulse <site>` (MCP `lockpick_start_pulse`) starts a Pulse and waits, if they allowed Pulse starts when approving the CLI. It uses one of the account's runs.
 
 ## Guardrails
 
